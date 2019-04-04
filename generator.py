@@ -20,26 +20,20 @@ class ImageGenerator:
 
     def generateBlankImage(self, numNumbers):
 
-
         positions = []
-        img = Image.new("RGB", (self.width, self.height), color=(255, 255, 255))
+        img = Image.new("RGB", (self.width, self.height), color=(0, 255, 0))
 
         for x in range(numNumbers):
             numClass = rand.randint(0, 9)
             num = rand.randint(0, len(os.listdir("MNIST/" + str(numClass) + "/")))
             numImg = Image.open("MNIST/" + str(numClass) + "/img" + str(numClass) + "_" + str(num) + ".jpg")
             numImg.convert("RGBA")
-            numImg = PIL.ImageOps.invert(numImg)
-            pixeldata = list(img.getdata())
-
-            for i, pixel in enumerate(pixeldata):
-                if pixel[:3] == (255, 255, 255):
-                    pixeldata[i] = (255, 255, 255, 0)
+            numImgInv = PIL.ImageOps.invert(numImg)
 
             posX = rand.randint(0, self.width - 28)
             posY = rand.randint(0, self.height - 28)
 
-            img.paste(numImg, (posX, posY))
+            img.paste(numImgInv, (posX, posY), numImg)
             positions.append((posX, posY))
 
         img.save("lol.jpg")
