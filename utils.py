@@ -1,6 +1,8 @@
 import PIL
-import os
+import os, re
 import PIL.ImageOps
+
+import matplotlib.pyplot as plt
 
 from PIL import Image
 
@@ -23,3 +25,38 @@ def convertMNIST(src_dir, dst_dir):
             numImg.convert("RGBA")
             numImgInv = PIL.ImageOps.invert(numImg)
             numImgInv.save(dst_dir + "/" + str(i) + "/img" + str(i) + "_" + str(j) + ".jpg")
+
+
+def plotAccuracy(filepath, loss=True):
+
+    if loss:
+        losses = []
+        with open(filepath + 'loss.txt', 'r+') as f:
+            for line in f.readlines():
+                line = re.sub('\n', '', line)
+                losses.append(float(line))
+            f.close()
+
+    accuracies = []
+    with open(filepath + 'accuracy.txt', 'r+') as f:
+        for line in f.readlines():
+            line = re.sub('\n', '', line)
+            accuracies.append(float(line))
+        f.close()
+
+    plt.plot(range(len(accuracies)), accuracies)
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.title('Accuracy over time')
+    plt.show()
+
+    if loss:
+        plt.plot(range(len(losses)), losses)
+        plt.xlabel('Steps')
+        plt.ylabel('Loss')
+        plt.title('Loss over time')
+        plt.show()
+
+
+plotAccuracy('checkpoints/16_epochs_tanh_FC/', loss=True)
+
