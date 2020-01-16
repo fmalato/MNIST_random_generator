@@ -31,7 +31,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 net = LeNet5()
 #net = LeNet5_FC()
-#net.cuda()
+
 summary(net, input_size=(1, 32, 32))
 
 criterion = nn.CrossEntropyLoss()
@@ -101,10 +101,6 @@ def main():
         for a in accuracies:
             f.write(str(a) + '\n')
         f.close()
-
-"""def fullyConvLoss(output, target):
-    loss = torch.sum()
-    return loss"""
 
 
 if __name__ == '__main__':

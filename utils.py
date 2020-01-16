@@ -58,5 +58,5 @@ def plotAccuracy(filepath, loss=True):
         plt.show()
 
 
-plotAccuracy('checkpoints/16_epochs_tanh_FC/', loss=True)
+#plotAccuracy('checkpoints/16_epochs_tanh_FC/', loss=True)
 
