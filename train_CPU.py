@@ -5,52 +5,23 @@ import torch.optim as optim
 import torchvision.transforms as transforms
 
 from net import LeNet5, LeNet5_FC
+from generator import MNISTDataset
+
 from torchvision.datasets.mnist import MNIST
 from torch.utils.data import DataLoader
 from torchsummary import summary
 
-# Starting code:
-# https://github.com/activatedgeek/LeNet-5/blob/master/lenet.py
 
-data_train = MNIST('./data/mnist',
-                   download=True,
-                   transform=transforms.Compose([
-                       transforms.Resize((32, 32)),
-                       transforms.ToTensor()]))
-data_test = MNIST('./data/mnist',
-                  train=False,
-                  download=True,
-                  transform=transforms.Compose([
-                      transforms.Resize((32, 32)),
-                      transforms.ToTensor()]))
-data_train_loader = DataLoader(data_train, batch_size=256, shuffle=True, num_workers=8)
-data_test_loader = DataLoader(data_test, batch_size=1024, num_workers=8)
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-
-net = LeNet5()
-#net = LeNet5_FC()
-
-summary(net, input_size=(1, 32, 32))
-
-criterion = nn.CrossEntropyLoss()
-# parameters given from fully convolutional networks paper
-optimizer = optim.SGD(net.parameters(), lr=2e-3, momentum=0.9)
-
-losses = []
-accuracies = []
-
-def train(epoch):
+def train(net, data_train_loader, optimizer, device, criterion, losses, epoch):
 
     net.train()
     loss_list, batch_list = [], []
+
     for i, (images, labels) in enumerate(data_train_loader):
 
         optimizer.zero_grad()
 
         output = net(images.to(device))
-
         loss = criterion(output, labels.to(device))
 
         loss_list.append(loss.detach().item())
@@ -64,12 +35,12 @@ def train(epoch):
         optimizer.step()
 
 
-def test():
-    net.eval()
+def test(net_to_test, data_test_loader, device, criterion, data_test, accuracies):
+    net_to_test.eval()
     total_correct = 0
     avg_loss = 0.0
     for i, (images, labels) in enumerate(data_test_loader):
-        output = net(images.to(device))
+        output = net_to_test(images.to(device))
         avg_loss += criterion(output, labels.to(device)).sum()
         pred = output.detach().max(1)[1]
         total_correct += pred.eq(labels.to(device).view_as(pred)).sum()
@@ -79,18 +50,52 @@ def test():
     accuracies.append(float(total_correct) / len(data_test))
 
 
-def train_and_test(epoch):
-    train(epoch)
-    test()
+def train_and_test(net, data_train_loader, data_test_loader, optimizer, device, criterion, epoch, data_test, losses,
+                   accuracies):
+    train(net, data_train_loader, optimizer, device, criterion, losses, epoch)
+    test(net, data_test_loader, device, criterion, data_test, accuracies)
 
 
 def main():
-    num_epochs = 16
+    # Starting code:
+    # https://github.com/activatedgeek/LeNet-5/blob/master/lenet.py
+
+    data_train = MNIST('./data/mnist',
+                       download=True,
+                       transform=transforms.Compose([
+                           transforms.Resize((32, 32)),
+                           transforms.ToTensor()]))
+    data_test = MNIST('./data/mnist',
+                      train=False,
+                      download=True,
+                      transform=transforms.Compose([
+                          transforms.Resize((32, 32)),
+                          transforms.ToTensor()]))
+
+    data_train_loader = DataLoader(data_train, batch_size=16, shuffle=True, num_workers=8)
+    data_test_loader = DataLoader(data_test, batch_size=16, num_workers=8)
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    # net = LeNet5()
+    net = LeNet5_FC()
+
+    summary(net, input_size=(1, 32, 32))
+
+    criterion = nn.CrossEntropyLoss()
+    # parameters given from fully convolutional networks paper
+    optimizer = optim.SGD(net.parameters(), lr=2e-3, momentum=0.9)
+
+    losses = []
+    accuracies = []
+
+    num_epochs = 2
     if '{x}_epochs_tanh_FC'.format(x=num_epochs) not in os.listdir('checkpoints/'):
         os.mkdir('checkpoints/{x}_epochs_tanh_FC'.format(x=num_epochs))
 
     for e in range(1, num_epochs):
-        train_and_test(e)
+        train_and_test(net, data_train_loader, data_test_loader, optimizer, device, criterion, num_epochs, data_test,
+                       losses, accuracies)
     torch.save(net.state_dict(), 'checkpoints/{x}_epochs_tanh_FC/{x}_epochs_tanh_FC.pth'.format(x=num_epochs))
     with open('checkpoints/{x}_epochs_tanh_FC/loss.txt'.format(x=num_epochs), 'w+') as f:
         for loss in losses:

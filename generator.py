@@ -10,6 +10,7 @@ import utils
 import pandas as pd
 import torch
 import numpy as np
+import torchvision.transforms as transforms
 
 class ImageGenerator:
 
@@ -30,11 +31,12 @@ class ImageGenerator:
 
         for x in range(numNumbers):
             numClass = rand.randint(0, 9)
-            num = rand.randint(0, len(os.listdir("MNIST/" + str(numClass) + "/")))
+            num = rand.randint(0, len(os.listdir("MNIST/" + str(numClass) + "/")) - 1)
             numImg = Image.open("MNIST/" + str(numClass) + "/img" + str(numClass) + "_" + str(num) + ".jpg")
             numImg.convert("RGBA")
             numImgInv = PIL.ImageOps.invert(numImg)
-            scale = rand.choice((0.5, 1, 1.5, 2))
+            #scale = rand.choice((0.5, 1, 1.5, 2))
+            scale = 1
             numImg = numImg.resize((int(numImg.size[0] * scale), int(numImg.size[1] * scale)), PIL.Image.ANTIALIAS)
             numImgInv = numImgInv.resize((int(numImgInv.size[0] * scale), int(numImgInv.size[1] * scale)), PIL.Image.ANTIALIAS)
 
@@ -57,7 +59,7 @@ class ImageGenerator:
 
         for x in range(numNumbers):
             numClass = rand.randint(0, 9)
-            num = rand.randint(0, len(os.listdir("MNIST/" + str(numClass) + "/")))
+            num = rand.randint(0, len(os.listdir("MNIST/" + str(numClass) + "/")) - 1)
             numImg = Image.open("MNIST/" + str(numClass) + "/img" + str(numClass) + "_" + str(num) + ".jpg")
             numImg.convert("RGBA")
             numImgInv = PIL.ImageOps.invert(numImg)
@@ -78,7 +80,7 @@ class ImageGenerator:
         return img
 
 
-class datasetGenerator(ImageGenerator):
+class DatasetGenerator(ImageGenerator):
 
     def __init__(self, height, width, path):
         super().__init__(height, width)
@@ -112,9 +114,21 @@ class datasetGenerator(ImageGenerator):
         print("Annotations have been created correctly.")
 
 
+    def generateMasks(self, path_to_data):
+
+        if not os.path.exists(path_to_data + "masks"):
+            os.mkdir(path_to_data + "masks/")
+
+        for el in os.listdir(path_to_data + "imgs/"):
+            img = Image.open(path_to_data + "imgs/" + el)
+            img = PIL.ImageOps.grayscale(img)
+            img.convert('1')
+            img.save(path_to_data + "masks/" + el)
+
+
 class MNISTDataset(Dataset):
 
-    def __init__(self, csv_file, root_dir, transform=None):
+    def __init__(self, csv_file, root_dir, transform=transforms.ToTensor()):
         self.landmarks_frame = pd.read_csv(csv_file)
         self.root_dir = root_dir
         self.transform = transform
@@ -129,13 +143,15 @@ class MNISTDataset(Dataset):
 
         img_name = os.path.join(self.root_dir,
                                 self.landmarks_frame.iloc[idx, 0])
-        image = io.imread(img_name)
+        #image = io.imread(img_name)
+        image = Image.open(img_name)
         landmarks = self.landmarks_frame.iloc[idx, 1:10]
         landmarks = np.array([landmarks])
         landmarks = landmarks.astype('float').reshape(-1, 3)
         sample = {'image': image, 'landmarks': landmarks}
 
         if self.transform:
-            sample = self.transform(sample)
+            sample['image'] = self.transform(sample['image'])
 
-        return sample
+        return sample['image']
+

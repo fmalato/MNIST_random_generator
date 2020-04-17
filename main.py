@@ -18,3 +18,4 @@ for pic in bgImages:
     img.save("generated/bg_" + pic + ".jpg")
 
 # utils.convertMNIST("MNIST/", "MNIST_inv/")
+
