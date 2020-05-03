@@ -72,7 +72,7 @@ class LeNet5_FC(nn.Module):
                 # Temporary solution: the last layer from the old model is the output layer, while the layer with
                 # the same name in the new model is not. Hence, the layer in the new model has way more parameters
                 # and therefore the old ones cannot be fit there.
-                if layer < len(state_dict) - 2:
+                if layer < len(state_dict) - 2:    # Excludes the old network's final layer (both weights and biases)
                     param = param.data
                     # -------- Reshaping parameters --------
                     new_shape = list(list(self.state_dict().items())[layer][1].shape)
@@ -80,30 +80,3 @@ class LeNet5_FC(nn.Module):
                     # --------------------------------------
             self_state[name].copy_(param)
             layer += 1
-
-
-class ShittyFCN(nn.Module):
-
-    def __init__(self):
-        super().__init__()
-
-        self.convnet = nn.Sequential(OrderedDict([
-            ('c1', nn.Conv2d(1, 64, kernel_size=(5, 5))),
-            ('relu1', nn.Tanh()),
-            ('s2', nn.MaxPool2d(kernel_size=(2, 2), stride=2)),
-            ('c3', nn.Conv2d(64, 64, kernel_size=(5, 5))),
-            ('relu3', nn.Tanh()),
-            ('s4', nn.MaxPool2d(kernel_size=(2, 2), stride=2)),
-            ('relu5', nn.Tanh()),
-            # Convolutionalized
-            ('f6', nn.Conv2d(64, 128, kernel_size=(1, 1))),
-            ('relu6', nn.Tanh()),
-            ('f7', nn.Conv2d(128, 128, kernel_size=(1, 1))),
-            ('relu7', nn.Tanh()),
-            ('fc8', nn.Conv2d(128, 10, kernel_size=(1, 1))),
-            ('sig8', nn.LogSoftmax(dim=-1))
-        ]))
-
-    def forward(self, img):
-        output = self.convnet(img)
-        return output
