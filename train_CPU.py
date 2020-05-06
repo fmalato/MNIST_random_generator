@@ -85,12 +85,10 @@ def test_FCN(net_to_test, data_test_loader, device, criterion, data_test, accura
     avg_loss = 0.0
     for i, (images, labels) in enumerate(data_test_loader):
         out = net_to_test(images.to(device))
-        outputs = []
-        for el in out:
-            res = el.data.tolist()
-            res = [x[0][0] for x in res]
-            outputs.append(res)
-        avg_loss += criterion(torch.FloatTensor(outputs), labels.to(device)).sum()
+        # TODO: why the hell -2.xxx?!
+        output = out.view([16, 10])
+        #print(output)
+        avg_loss += criterion(output, labels.to(device)).sum()
         pred = out.detach().max(1)[1]
         total_correct += pred.eq(labels.to(device).view_as(pred)).sum()
 

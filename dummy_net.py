@@ -25,7 +25,7 @@ class DummyNet(nn.Module):
             ('fc6', nn.Linear(128, 128)),
             ('relu6', nn.ReLU()),
             ('e7', nn.Linear(128, 10)),
-            ('sig7', nn.ReLU())
+            ('sig7', nn.LogSoftmax())
         ]))
 
     def forward(self, img):
@@ -54,17 +54,17 @@ class DummyFCN(nn.Module):
         ]))
         # Convolutionalized
         self.fc = nn.Sequential(OrderedDict([
-            ('f6', nn.Conv2d(64 * 7 * 7, 128, kernel_size=(1, 1))),
+            ('f6', nn.Conv2d(64, 128, kernel_size=(1, 1))),
             ('relu6', nn.ReLU()),
             ('f7', nn.Conv2d(128, 128, kernel_size=(1, 1))),
             ('relu7', nn.ReLU()),
             ('fc8', nn.Conv2d(128, 10, kernel_size=(1, 1))),
-            ('sig8', nn.ReLU())
+            ('sig8', nn.LogSoftmax()),
+            ('fc9', nn.MaxPool2d(kernel_size=(7, 7), stride=1))
         ]))
 
     def forward(self, img):
         output = self.convnet(img)
-        output = output.view([self.batch_size, 64*7*7, 1, 1])
         output = self.fc(output)
         return output
 

@@ -30,8 +30,13 @@ data_test_loader = DataLoader(data_test, batch_size=batch_size, num_workers=8)
 
 net = LeNet5()
 net_FCN = LeNet5_FC()
+#net = DummyNet()
+#net_FCN = DummyFCN(batch_size)
 # Same checkpoint for both networks
+# LeNet5
 checkpoint = 'checkpoints/10_epochs_LeNet5_32x32/10_epochs_LeNet5_32x32.pth'
+# Dummy
+#checkpoint = 'checkpoints/10_epochs_dummy_32x32/10_epochs_dummy_32x32.pth'
 
 # functional.py calls a methods that asks for some weights that are not initialized. Maybe it's caused by
 # unfitting data from the custom state dict?

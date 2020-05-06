@@ -37,13 +37,13 @@ class LeNet5_FC(nn.Module):
         super(LeNet5_FC, self).__init__()
 
         self.convnet = nn.Sequential(OrderedDict([
-            ('c1', nn.Conv2d(1, 6, kernel_size=(5, 5))),
+            ('c1', nn.Conv2d(1, 6, kernel_size=(5, 5), stride=1)),
             ('relu1', nn.Tanh()),
             ('s2', nn.MaxPool2d(kernel_size=(1, 1), stride=2)),
-            ('c3', nn.Conv2d(6, 16, kernel_size=(5, 5))),
+            ('c3', nn.Conv2d(6, 16, kernel_size=(5, 5), stride=1)),
             ('relu3', nn.Tanh()),
             ('s4', nn.MaxPool2d(kernel_size=(1, 1), stride=2)),
-            ('c5', nn.Conv2d(16, 120, kernel_size=(5, 5))),
+            ('c5', nn.Conv2d(16, 120, kernel_size=(5, 5), stride=1)),
             ('relu5', nn.Tanh())
         ]))
 
@@ -51,11 +51,14 @@ class LeNet5_FC(nn.Module):
             ('f6', nn.Conv2d(120, 84, kernel_size=(1, 1))),
             ('relu6', nn.Tanh()),
             ('fc7', nn.Conv2d(84, 10, kernel_size=(1, 1))),
-            ('sig7', nn.LogSoftmax(dim=-1))
+            ('sig7', nn.LogSoftmax()),
+            ('fc8', nn.MaxPool2d(kernel_size=(7, 7), stride=1))
         ]))
 
     def forward(self, img):
         output = self.convnet(img)
+        # TODO: Fix with correct shape
+        print(output.shape)
         output = self.fc(output)
         return output
 
