@@ -1,4 +1,4 @@
-import os
+import os, sys
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -29,7 +29,7 @@ def train(net, data_train_loader, optimizer, device, criterion, losses, epoch):
         loss_list.append(loss.detach().item())
         batch_list.append(i+1)
 
-        print('Train - Epoch %d, Batch: %d, Loss: %f' % (epoch, i, loss.detach().item()))
+        sys.stdout.write('\rTrain - Epoch %d, Batch: %d, Loss: %f' % (epoch, i, loss.detach().item()))
         losses.append(loss.detach().item())
 
         loss.backward()
@@ -56,7 +56,7 @@ def train_FCN(net, data_train_loader, optimizer, device, criterion, losses, epoc
         loss_list.append(loss.detach().item())
         batch_list.append(i+1)
 
-        print('Train - Epoch %d, Batch: %d, Loss: %f' % (epoch, i, loss.detach().item()))
+        sys.stdout.write('\rTrain - Epoch %d, Batch: %d, Loss: %f' % (epoch, i, loss.detach().item()))
         losses.append(loss.detach().item())
 
         loss.backward()
@@ -75,7 +75,7 @@ def test(net_to_test, data_test_loader, device, criterion, data_test, accuracies
         total_correct += pred.eq(labels.to(device).view_as(pred)).sum()
 
     avg_loss /= len(data_test)
-    print('Test Avg. Loss: %f, Accuracy: %f' % (avg_loss.detach().item(), float(total_correct) / len(data_test)))
+    sys.stdout.write('\rTest Avg. Loss: %f, Accuracy: %f' % (avg_loss.detach().item(), float(total_correct) / len(data_test)))
     accuracies.append(float(total_correct) / len(data_test))
 
 
@@ -122,10 +122,10 @@ def main():
     data_train_loader = DataLoader(data_train, batch_size=16, shuffle=True, num_workers=8)
     data_test_loader = DataLoader(data_test, batch_size=16, num_workers=8)
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
 
-    #net = LeNet5()
-    net = LeNet5_FC()
+    net = LeNet5()
+    #net = LeNet5_FC()
     #net = DummyNet()
     #net = DummyFCN()
 
