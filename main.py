@@ -1,15 +1,22 @@
 import utils
+import numpy as np
 
+from PIL import Image
 from generator import ImageGenerator
 
 gen = ImageGenerator(200, 200)
 
-sizes = [(500, 400), (600, 600), (800, 600), (1000, 1000), (1200, 1200)]
+sizes = [(112, 112)]
+sal = True
 for el in sizes:
     gen.setWidth(el[0])
     gen.setHeight(el[1])
-    img = gen.generateBlankImage(17)
+    img, _, saliency = gen.generateBlankImage(numNumbers=1, saliency=sal)
+    img = Image.fromarray(img)
+    saliency = Image.fromarray(np.uint8(saliency * 255), mode="L")
     img.save("generated/no_bg_" + str(el[0]) + "x" + str(el[1]) + ".jpg")
+    if sal:
+        saliency.save("generated/no_bg_" + str(el[0]) + "x" + str(el[1]) + "_saliency.jpg")
 
 bgImages = ["sand", "crowded1", "crowded2", "landscape"]
 

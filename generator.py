@@ -12,6 +12,7 @@ import torch
 import numpy as np
 import torchvision.transforms as transforms
 
+
 class ImageGenerator:
 
     def __init__(self, height, width):
@@ -24,11 +25,14 @@ class ImageGenerator:
     def setHeight(self, height):
         self.height = height
 
-    def generateBlankImage(self, numNumbers):
+    def generateBlankImage(self, numNumbers, saliency=True):
 
         positions = []
         img = Image.new("RGB", (self.width, self.height), color=(0, 255, 0))
-
+        if saliency:
+            saliency_map = np.zeros(shape=(self.width, self.height))
+        else:
+            saliency_map = []
         for x in range(numNumbers):
             numClass = rand.randint(0, 9)
             num = rand.randint(0, len(os.listdir("MNIST/" + str(numClass) + "/")) - 1)
@@ -49,8 +53,17 @@ class ImageGenerator:
 
             img.paste(numImgInv, (posX, posY), numImg)
             positions.append((posX, posY, scale))
+            img = np.array(img)
 
-        return img, positions
+            if saliency:
+                kernel = utils.matlab_style_gauss2D(shape=(28*scale, 28*scale), sigma=5)
+                max_k = np.max(kernel)
+                kernel = kernel / max_k
+                saliency_map[posY: posY + 28*scale, posX: posX + 28*scale] += kernel
+
+        #saliency_map = Image.fromarray(np.uint8(saliency_map * 255), mode="L")
+
+        return img, positions, saliency_map
 
     def generateBackgroudImage(self, numNumbers, bgPath):
 

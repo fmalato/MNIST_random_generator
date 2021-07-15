@@ -31,6 +31,12 @@ class LeNet5(nn.Module):
         output = self.fc(output)
         return output
 
+    def extract_features(self, img):
+        output = self.convnet(img)
+        output = output.view(img.size(0), -1)
+        return output
+
+
 class LeNet5_FC(nn.Module):
 
     def __init__(self):

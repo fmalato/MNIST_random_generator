@@ -11,7 +11,7 @@ from generator import MNISTDataset
 
 from torchvision.datasets.mnist import MNIST
 from torch.utils.data import DataLoader
-from torchsummary import summary
+#from torchsummary import summary
 
 
 def train(net, data_train_loader, optimizer, device, criterion, losses, epoch):
@@ -129,7 +129,7 @@ def main():
     #net = DummyNet()
     #net = DummyFCN()
 
-    summary(net, input_size=(1, 32, 32))
+    #summary(net, input_size=(1, 32, 32))
 
     criterion = nn.CrossEntropyLoss()
     # parameters given from fully convolutional networks paper 2e-3 0.9
