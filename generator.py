@@ -54,10 +54,10 @@ class ImageGenerator:
             img.paste(numImgInv, (posX, posY), numImg)
             positions.append((posX, posY, scale))
             if saliency:
-                filter = utils_mnist.matlab_style_gauss2D(shape=(28*scale, 28*scale), sigma=5)
+                filter = utils_mnist.matlab_style_gauss2D(shape=(28 * scale, 28 * scale), sigma=5)
                 max_filter = np.max(filter)
                 filter = filter / max_filter
-                saliency_map[posY: posY + 28*scale, posX: posX + 28*scale] += filter
+                saliency_map[posY: posY + 28 * scale, posX: posX + 28 * scale] += filter
 
         img = np.array(img)
 
