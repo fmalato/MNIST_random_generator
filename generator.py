@@ -6,7 +6,7 @@ from skimage import io
 from torch.utils.data import Dataset, DataLoader
 
 import PIL.ImageOps
-import utils
+import MNIST_random_generator.utils_mnist as utils_mnist
 import pandas as pd
 import torch
 import numpy as np
@@ -24,10 +24,14 @@ class ImageGenerator:
     def setHeight(self, height):
         self.height = height
 
-    def generateBlankImage(self, numNumbers):
+    def generateBlankImage(self, numNumbers, saliency=True):
 
         positions = []
         img = Image.new("RGB", (self.width, self.height), color=(0, 255, 0))
+        if saliency:
+            saliency_map = np.zeros(shape=(self.width, self.height))
+        else:
+            saliency_map = []
 
         for x in range(numNumbers):
             numClass = rand.randint(0, 9)
@@ -43,14 +47,21 @@ class ImageGenerator:
             posX = rand.randint(0, img.size[0] - 28 * scale)
             posY = rand.randint(0, img.size[1] - 28 * scale)
 
-            while not utils.goodPos(positions, (posX, posY), 28):
+            while not utils_mnist.goodPos(positions, (posX, posY), 28):
                 posX = rand.randint(0, img.size[0] - 28 * scale)
                 posY = rand.randint(0, img.size[1] - 28 * scale)
 
             img.paste(numImgInv, (posX, posY), numImg)
             positions.append((posX, posY, scale))
+            if saliency:
+                filter = utils_mnist.matlab_style_gauss2D(shape=(28*scale, 28*scale), sigma=5)
+                max_filter = np.max(filter)
+                filter = filter / max_filter
+                saliency_map[posY: posY + 28*scale, posX: posX + 28*scale] += filter
 
-        return img, positions
+        img = np.array(img)
+
+        return img, positions, saliency_map
 
     def generateBackgroudImage(self, numNumbers, bgPath):
 
@@ -70,7 +81,7 @@ class ImageGenerator:
             posX = rand.randint(0, img.size[0] - 28)
             posY = rand.randint(0, img.size[1] - 28)
 
-            while not utils.goodPos(positions, (posX, posY), 28):
+            while not utils_mnist.goodPos(positions, (posX, posY), 28):
                 posX = rand.randint(0, img.size[0] - 28)
                 posY = rand.randint(0, img.size[1] - 28)
 
