@@ -37,7 +37,7 @@ class LeNet5(nn.Module):
         return output
 
 
-class LeNet5_FC(nn.Module):
+"""class LeNet5_FC(nn.Module):
 
     def __init__(self):
         super(LeNet5_FC, self).__init__()
@@ -81,4 +81,4 @@ class LeNet5_FC(nn.Module):
                 param = param.view(new_shape)
                 # --------------------------------------
             self_state[name].copy_(param)
-            layer += 1
+            layer += 1"""

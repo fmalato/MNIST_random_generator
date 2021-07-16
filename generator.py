@@ -28,6 +28,7 @@ class ImageGenerator:
     def generateBlankImage(self, numNumbers, saliency=True):
 
         positions = []
+        classes = []
         img = Image.new("RGB", (self.width, self.height), color=(0, 255, 0))
         if saliency:
             saliency_map = np.zeros(shape=(self.width, self.height))
@@ -36,8 +37,9 @@ class ImageGenerator:
 
         for x in range(numNumbers):
             numClass = rand.randint(0, 9)
-            num = rand.randint(0, len(os.listdir("MNIST/" + str(numClass) + "/")) - 1)
-            numImg = Image.open("MNIST/" + str(numClass) + "/img" + str(numClass) + "_" + str(num) + ".jpg")
+            classes.append(numClass)
+            num = rand.randint(0, len(os.listdir("MNIST_random_generator/MNIST/" + str(numClass) + "/")) - 1)
+            numImg = Image.open("MNIST_random_generator/MNIST/" + str(numClass) + "/img" + str(numClass) + "_" + str(num) + ".jpg")
             numImg.convert("RGBA")
             numImgInv = PIL.ImageOps.invert(numImg)
             #scale = rand.choice((0.5, 1, 1.5, 2))
@@ -53,6 +55,7 @@ class ImageGenerator:
                 posY = rand.randint(0, img.size[1] - 28 * scale)
 
             img.paste(numImgInv, (posX, posY), numImg)
+            img = img.convert('L')
             positions.append((posX, posY, scale))
             if saliency:
                 filter = utils_mnist.matlab_style_gauss2D(shape=(28 * scale, 28 * scale), sigma=5)
@@ -62,7 +65,7 @@ class ImageGenerator:
 
         img = np.array(img)
 
-        return img, positions, saliency_map
+        return img, positions, saliency_map, classes
 
     def generateBackgroudImage(self, numNumbers, bgPath):
 

@@ -5,7 +5,7 @@ import torch.optim as optim
 import torchvision.transforms as transforms
 import numpy as np
 
-from net import LeNet5, LeNet5_FC
+from net import LeNet5
 from dummy_net import DummyNet, DummyFCN
 from generator import MNISTDataset
 
@@ -119,8 +119,8 @@ def main():
                           transforms.Resize((32, 32)),
                           transforms.ToTensor()]))
 
-    data_train_loader = DataLoader(data_train, batch_size=16, shuffle=True, num_workers=8)
-    data_test_loader = DataLoader(data_test, batch_size=16, num_workers=8)
+    data_train_loader = DataLoader(data_train, batch_size=1, shuffle=True, num_workers=8)
+    data_test_loader = DataLoader(data_test, batch_size=1, num_workers=8)
 
     device = torch.device("cpu")
 
@@ -139,7 +139,7 @@ def main():
     accuracies = []
 
     num_epochs = 10
-    name = 'epochs_LeNet5_FC_32x32'
+    name = 'batch_size_1'
     if '{x}_{n}'.format(x=num_epochs, n=name) not in os.listdir('checkpoints/'):
         os.mkdir('checkpoints/{x}_{n}'.format(x=num_epochs, n=name))
 

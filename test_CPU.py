@@ -34,7 +34,7 @@ net_FCN = LeNet5_FC()
 #net_FCN = DummyFCN(batch_size)
 # Same checkpoint for both networks
 # LeNet5
-checkpoint = 'checkpoints/10_epochs_LeNet5_32x32/10_epochs_LeNet5_32x32.pth'
+checkpoint = 'checkpoints/10_batch_size_16/10_batch_size_16.pth'
 # Dummy
 #checkpoint = 'checkpoints/10_epochs_dummy_32x32/10_epochs_dummy_32x32.pth'
 

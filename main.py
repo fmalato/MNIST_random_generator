@@ -7,11 +7,11 @@ from MNIST_random_generator.generator import ImageGenerator
 gen = ImageGenerator(200, 200)
 saliency = True
 
-sizes = [(200, 200)]
+sizes = [(112, 112)]
 for el in sizes:
     gen.setWidth(el[0])
     gen.setHeight(el[1])
-    img, _, saliency_map = gen.generateBlankImage(1, saliency=saliency)
+    img, _, saliency_map = gen.generateBlankImage(numNumbers=3, saliency=saliency)
     img = Image.fromarray(img)
     img.save("generated/no_bg_" + str(el[0]) + "x" + str(el[1]) + ".jpg")
     if saliency:
