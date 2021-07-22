@@ -38,8 +38,10 @@ class ImageGenerator:
         for x in range(numNumbers):
             numClass = rand.randint(0, 9)
             classes.append(numClass)
-            num = rand.randint(0, len(os.listdir("MNIST_random_generator/MNIST/" + str(numClass) + "/")) - 1)
-            numImg = Image.open("MNIST_random_generator/MNIST/" + str(numClass) + "/img" + str(numClass) + "_" + str(num) + ".jpg")
+            """num = rand.randint(0, len(os.listdir("MNIST_random_generator/MNIST/" + str(numClass) + "/")) - 1)
+            numImg = Image.open("MNIST_random_generator/MNIST/" + str(numClass) + "/img" + str(numClass) + "_" + str(num) + ".jpg")"""
+            # TODO: One image per class for now
+            numImg = Image.open(fp="../queries/img{x}.jpg".format(x=numClass))
             numImg.convert("RGBA")
             numImgInv = PIL.ImageOps.invert(numImg)
             #scale = rand.choice((0.5, 1, 1.5, 2))
