@@ -3,15 +3,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
-import numpy as np
 
-from net import LeNet5
-from dummy_net import DummyNet, DummyFCN
-from generator import MNISTDataset
+from MNIST_random_generator.net import LeNet5
 
 from torchvision.datasets.mnist import MNIST
 from torch.utils.data import DataLoader
-#from torchsummary import summary
 
 
 def train(net, data_train_loader, optimizer, device, criterion, losses, epoch):

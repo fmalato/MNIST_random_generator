@@ -1,7 +1,6 @@
 import PIL
 import os, re
 import PIL.ImageOps
-import numpy as np
 
 import numpy as np
 import matplotlib.pyplot as plt
