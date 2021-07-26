@@ -67,7 +67,6 @@ class ImageGenerator:
                 filter = filter / max_filter
                 saliency_map[posY: posY + numImgInv.size[0] * scale, posX: posX + numImgInv.size[1] * scale] += filter
 
-        print(positions)
         img = np.array(img)
 
         return img, positions, saliency_map, classes
