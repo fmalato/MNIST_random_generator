@@ -11,8 +11,8 @@ from PIL import Image
 def goodPos(positions, current, baseRangeWidth):
 
     for el in positions:
-        if current[0] in range(el[0], int(el[0] + baseRangeWidth * el[2])) or \
-                current[1] in range(el[1], int(el[1] + baseRangeWidth * el[2])):
+        if el[0] - baseRangeWidth * el[2] < current[0] < el[0] + baseRangeWidth * el[2] and \
+           el[1] - baseRangeWidth * el[2] < current[1] < el[1] + baseRangeWidth * el[2]:
             return False
 
     return True

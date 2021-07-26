@@ -1,5 +1,6 @@
 import random as rand
 import os
+import matplotlib.pyplot as plt
 
 from PIL import Image
 from skimage import io
@@ -29,7 +30,7 @@ class ImageGenerator:
 
         positions = []
         classes = []
-        img = Image.new("RGB", (self.width, self.height), color=(0, 255, 0))
+        img = Image.new("RGB", (self.width, self.height), color=(0, 0, 0))
         if saliency:
             saliency_map = np.zeros(shape=(self.width, self.height))
         else:
@@ -44,27 +45,29 @@ class ImageGenerator:
             numImg = Image.open(fp="queries/img{x}.jpg".format(x=numClass))
             numImg.convert("RGBA")
             numImgInv = PIL.ImageOps.invert(numImg)
+            # TODO: Fixed scale for now
             #scale = rand.choice((0.5, 1, 1.5, 2))
             scale = 1
-            numImg = numImg.resize((int(numImg.size[0] * scale), int(numImg.size[1] * scale)), PIL.Image.ANTIALIAS)
+            #numImg = numImg.resize((int(numImg.size[0] * scale), int(numImg.size[1] * scale)), PIL.Image.ANTIALIAS)
             numImgInv = numImgInv.resize((int(numImgInv.size[0] * scale), int(numImgInv.size[1] * scale)), PIL.Image.ANTIALIAS)
 
-            posX = rand.randint(0, img.size[0] - 28 * scale)
-            posY = rand.randint(0, img.size[1] - 28 * scale)
+            posX = rand.randint(0, img.size[0] - numImgInv.size[0] * scale)
+            posY = rand.randint(0, img.size[1] - numImgInv.size[1] * scale)
 
-            while not utils_mnist.goodPos(positions, (posX, posY), 28):
-                posX = rand.randint(0, img.size[0] - 28 * scale)
-                posY = rand.randint(0, img.size[1] - 28 * scale)
+            while not utils_mnist.goodPos(positions, (posX, posY), numImgInv.size[0]):
+                posX = rand.randint(0, img.size[0] - numImgInv.size[0] * scale)
+                posY = rand.randint(0, img.size[1] - numImgInv.size[1] * scale)
 
-            img.paste(numImgInv, (posX, posY), numImg)
+            img.paste(numImgInv, (posX, posY))
             img = img.convert('L')
             positions.append((posX, posY, scale))
             if saliency:
-                filter = utils_mnist.matlab_style_gauss2D(shape=(28 * scale, 28 * scale), sigma=5)
+                filter = utils_mnist.matlab_style_gauss2D(shape=(numImgInv.size[0] * scale, numImgInv.size[1] * scale), sigma=5)
                 max_filter = np.max(filter)
                 filter = filter / max_filter
-                saliency_map[posY: posY + 28 * scale, posX: posX + 28 * scale] += filter
+                saliency_map[posY: posY + numImgInv.size[0] * scale, posX: posX + numImgInv.size[1] * scale] += filter
 
+        print(positions)
         img = np.array(img)
 
         return img, positions, saliency_map, classes
