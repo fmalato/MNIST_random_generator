@@ -1,3 +1,4 @@
+import random
 import random as rand
 import os
 import matplotlib.pyplot as plt
@@ -44,28 +45,28 @@ class ImageGenerator:
             # TODO: One image per class for now
             numImg = Image.open(fp="queries/img{x}.jpg".format(x=numClass))
             numImg.convert("RGBA")
-            numImgInv = PIL.ImageOps.invert(numImg)
+            #numImgInv = PIL.ImageOps.invert(numImg)
             # TODO: Fixed scale for now
             #scale = rand.choice((0.5, 1, 1.5, 2))
             scale = 1
-            #numImg = numImg.resize((int(numImg.size[0] * scale), int(numImg.size[1] * scale)), PIL.Image.ANTIALIAS)
-            numImgInv = numImgInv.resize((int(numImgInv.size[0] * scale), int(numImgInv.size[1] * scale)), PIL.Image.ANTIALIAS)
+            numImg = numImg.resize((int(numImg.size[0] * scale), int(numImg.size[1] * scale)), PIL.Image.ANTIALIAS)
+            #numImgInv = numImgInv.resize((int(numImgInv.size[0] * scale), int(numImgInv.size[1] * scale)), PIL.Image.ANTIALIAS)
 
-            posX = rand.randint(0, img.size[0] - numImgInv.size[0] * scale)
-            posY = rand.randint(0, img.size[1] - numImgInv.size[1] * scale)
+            posX = rand.randint(0, img.size[0] - numImg.size[0] * scale)
+            posY = rand.randint(0, img.size[1] - numImg.size[1] * scale)
 
-            while not utils_mnist.goodPos(positions, (posX, posY), numImgInv.size[0]):
-                posX = rand.randint(0, img.size[0] - numImgInv.size[0] * scale)
-                posY = rand.randint(0, img.size[1] - numImgInv.size[1] * scale)
+            while not utils_mnist.goodPos(positions, (posX, posY), numImg.size[0]):
+                posX = rand.randint(0, img.size[0] - numImg.size[0] * scale)
+                posY = rand.randint(0, img.size[1] - numImg.size[1] * scale)
 
-            img.paste(numImgInv, (posX, posY))
+            img.paste(numImg, (posX, posY))
             img = img.convert('L')
             positions.append((posX, posY, scale))
             if saliency:
-                filter = utils_mnist.matlab_style_gauss2D(shape=(numImgInv.size[0] * scale, numImgInv.size[1] * scale), sigma=5)
+                filter = utils_mnist.matlab_style_gauss2D(shape=(numImg.size[0] * scale, numImg.size[1] * scale), sigma=5)
                 max_filter = np.max(filter)
                 filter = filter / max_filter
-                saliency_map[posY: posY + numImgInv.size[0] * scale, posX: posX + numImgInv.size[1] * scale] += filter
+                saliency_map[posY: posY + numImg.size[0] * scale, posX: posX + numImg.size[1] * scale] += filter
 
         img = np.array(img)
 
@@ -97,6 +98,53 @@ class ImageGenerator:
             positions.append((posX, posY, scale))
 
         return img
+
+    def generateBlankImageWithClasses(self, numNumbers, query, saliency=True):
+
+        positions = []
+        classes = []
+        img = Image.new("RGB", (self.width, self.height), color=(0, 0, 0))
+        if saliency:
+            saliency_map = np.zeros(shape=(self.width, self.height))
+        else:
+            saliency_map = []
+
+        for x in range(numNumbers):
+            classes.append(rand.randint(0, 9))
+        # Balancing probability of number being in the sequence
+        if query not in classes and rand.uniform(0.0, 1.0) <= 0.33:
+            classes.pop(numNumbers - 1)
+            classes.append(query)
+
+        for numClass in classes:
+            # TODO: One image per class for now
+            numImg = Image.open(fp="queries/img{x}.jpg".format(x=numClass))
+            numImg.convert("RGBA")
+            # TODO: Fixed scale for now
+            # scale = rand.choice((0.5, 1, 1.5, 2))
+            scale = 1
+            numImg = numImg.resize((int(numImg.size[0] * scale), int(numImg.size[1] * scale)), PIL.Image.ANTIALIAS)
+
+            posX = rand.randint(0, img.size[0] - numImg.size[0] * scale)
+            posY = rand.randint(0, img.size[1] - numImg.size[1] * scale)
+
+            while not utils_mnist.goodPos(positions, (posX, posY), numImg.size[0]):
+                posX = rand.randint(0, img.size[0] - numImg.size[0] * scale)
+                posY = rand.randint(0, img.size[1] - numImg.size[1] * scale)
+
+            img.paste(numImg, (posX, posY))
+            img = img.convert('L')
+            positions.append((posX, posY, scale))
+            if saliency:
+                filter = utils_mnist.matlab_style_gauss2D(shape=(numImg.size[0] * scale, numImg.size[1] * scale),
+                                                          sigma=5)
+                max_filter = np.max(filter)
+                filter = filter / max_filter
+                saliency_map[posY: posY + numImg.size[0] * scale, posX: posX + numImg.size[1] * scale] += filter
+
+        img = np.array(img)
+
+        return img, positions, saliency_map, classes
 
 
 class DatasetGenerator(ImageGenerator):
